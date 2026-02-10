@@ -1,0 +1,40 @@
+name: Build and Release DLL
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggered on tags like v1.0.0
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build Release
+      run: dotnet build -c Release --no-restore
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          bin/Release/net10.0/XorGate.dll
+          bin/Release/net10.0/XorGate.xml
+        body: |
+          ## XorGate Release ${{ github.ref_name }}
+
+          Download `XorGate.dll` and add it to your .NET project.
+
+          See [README.md](https://github.com/${{ github.repository }}/blob/main/README.md) for usage instructions.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
